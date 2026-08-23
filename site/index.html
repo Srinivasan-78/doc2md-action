@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs to Markdown</title>
+<meta name="description" content="Convert Word, Excel, PowerPoint, PDF and images to token-efficient Markdown, entirely in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<script>
+  // Runs before first paint: dark ships in the markup, so only a stored
+  // light preference has to be applied here.
+  (function () {
+    document.documentElement.classList.add("js");
+    try {
+      if (localStorage.getItem("theme") === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    } catch (e) {}
+  })();
+</script>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav-bar">
+  <div class="wrap nav-inner">
+    <a class="eyebrow" href="https://github.com/srinivasan-78/doc2md-action">doc2md</a>
+    <nav class="nav-links">
+      <a class="lnk" href="https://github.com/srinivasan-78/doc2md-action">Action</a>
+      <button id="theme-toggle" class="nav-toggle" type="button" aria-pressed="false">Light</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <section class="section hero wrap">
+    <p class="eyebrow">Browser converter</p>
+    <h1 class="display display-xl">Documents in. Markdown out.</h1>
+    <p class="sec-lede">Word, Excel, PowerPoint, PDF, images, HTML and text become token-efficient
+      Markdown for AI agents. Conversion runs in this tab — no upload endpoint, no file leaves
+      your machine.</p>
+    <p class="micro-row">
+      <span class="micro">Local only</span>
+      <span class="micro">OCR included</span>
+      <span class="micro">Folders and .zip</span>
+      <span class="micro">Same rules as the Action</span>
+    </p>
+  </section>
+
+  <section class="section section-bleed wrap">
+    <div id="drop" class="drop card">
+      <p class="drop-title display">Drop files, folders or a .zip</p>
+      <p class="card-body drop-body">Everything in a dropped folder is converted, and archives are
+        unpacked one level.</p>
+      <p class="pickers">
+        <label class="btn primary">
+          Choose files
+          <input id="picker" type="file" multiple hidden
+                 accept=".pdf,.docx,.xlsx,.xlsm,.xlsb,.xls,.ods,.pptx,.csv,.tsv,.txt,.md,.html,.htm,.xml,.zip,.png,.jpg,.jpeg,.tif,.tiff,.bmp,.webp,.gif">
+        </label>
+        <label class="btn">
+          Choose a folder
+          <input id="folder-picker" type="file" webkitdirectory directory multiple hidden>
+        </label>
+      </p>
+    </div>
+
+    <div class="options card">
+      <p class="eyebrow options-head">Options</p>
+      <div class="options-grid">
+        <label>OCR
+          <select id="ocr">
+            <option value="auto" selected>auto</option>
+            <option value="always">always</option>
+            <option value="off">off</option>
+          </select>
+        </label>
+        <label>OCR language
+          <input id="ocr-lang" type="text" value="eng" size="8">
+        </label>
+        <label>OCR DPI
+          <input id="ocr-dpi" type="number" value="200" min="72" max="600" step="10">
+        </label>
+        <label>Min chars per page
+          <input id="min-chars" type="number" value="100" min="0" step="10">
+        </label>
+        <label class="check">
+          <input id="compact" type="checkbox" checked> Compact output
+        </label>
+      </div>
+    </div>
+
+    <p id="status" class="micro status" hidden></p>
+  </section>
+
+  <section id="results" class="section section-bleed wrap" hidden>
+    <div class="sec-head">
+      <p class="eyebrow">Output</p>
+      <h2 class="display display-lg">Your Markdown</h2>
+    </div>
+
+    <div class="toolbar">
+      <button id="copy-merged" class="btn primary" type="button">Copy all Markdown</button>
+      <button id="download-zip" class="btn" type="button">Download .zip</button>
+      <button id="download-merged" class="btn" type="button">Download context.md</button>
+      <button id="clear" class="btn" type="button">Clear</button>
+    </div>
+
+    <div class="table-wrap card">
+      <table id="table">
+        <thead>
+          <tr><th>Source</th><th>Kind</th><th>Pages</th><th>OCR</th><th>Tokens</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="totals" class="micro totals"></p>
+
+    <div class="preview-head">
+      <h2 class="eyebrow">Preview</h2>
+      <button id="copy-preview" class="btn small" type="button">Copy preview</button>
+    </div>
+    <pre id="preview"></pre>
+  </section>
+</main>
+
+<footer class="section-foot wrap">
+  <p class="micro">Legacy .doc and .ppt need LibreOffice and are only supported by the Action. Binary .xls is read here.</p>
+  <p class="micro"><a class="lnk" href="https://github.com/srinivasan-78/doc2md-action">Same conversion rules as the doc2md GitHub Action</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/turndown@7.2.0/dist/turndown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

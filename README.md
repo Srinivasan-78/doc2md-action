@@ -101,3 +101,35 @@ to wire anything up.
   budgeting, not a real tokenizer.
 - One unreadable document does not stop the run. It is listed as failed and everything
   else still converts.
+
+## Browser version on GitHub Pages
+
+`site/` is a static page that does the same conversion in the browser, so you can drop a
+document in and get Markdown back without committing it to a repository. Files are read
+with the File API and converted locally — there is no upload endpoint, because GitHub
+Pages serves static files only.
+
+Deploying it:
+
+1. In **Settings → Pages**, set **Source** to **GitHub Actions**.
+2. Push to `main`. `.github/workflows/pages.yml` publishes `site/` to
+   `https://<user>.github.io/<repo>/`.
+
+To try it locally, run `python -m http.server -d site` and open
+<http://localhost:8000>.
+
+Multiple files at once: drop a whole folder, drop a `.zip` (unpacked one level), or use
+**Choose a folder**. Conversions run in a pool sized from `navigator.hardwareConcurrency`,
+with a matching pool of Tesseract workers, and results are held as Blobs so a large batch
+does not fill the JS heap. Folder structure is preserved in the downloaded zip.
+
+Differences from the action:
+
+- Legacy `.doc` and `.ppt` are rejected — they need LibreOffice, which cannot run in a
+  browser. Use the action for those. Binary `.xls` is read directly by SheetJS and works.
+- OCR uses tesseract.js. The first OCR run downloads a language model (a few megabytes)
+  and is noticeably slower than Tesseract on a runner.
+- PDF text, DOCX, PPTX and spreadsheets use pdf.js, mammoth, JSZip and SheetJS, all loaded
+  from jsDelivr, so the page needs network access on first load.
+- Output is downloaded as individual `.md` files, a `.zip` (including `manifest.json`), or
+  one merged `context.md`.
