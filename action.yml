@@ -1,0 +1,119 @@
+name: "Docs to Markdown"
+description: "Scan Excel, Word, PowerPoint, PDF and image files, extract text (with OCR fallback) and convert them to token-efficient Markdown for AI agents."
+author: "srinivasan-78"
+branding:
+  icon: "file-text"
+  color: "purple"
+
+inputs:
+  files:
+    description: "Glob patterns of input files, newline or comma separated. Example: docs/**/*.pdf"
+    required: false
+    default: "**/*.{pdf,docx,doc,xlsx,xls,pptx,ppt,png,jpg,jpeg,tif,tiff,bmp,webp,html,htm,csv,txt}"
+  output-dir:
+    description: "Directory where Markdown files are written."
+    required: false
+    default: "markdown"
+  ocr:
+    description: "OCR mode for images and scanned PDFs: auto (only when little text found), always, or off."
+    required: false
+    default: "auto"
+  ocr-lang:
+    description: "Tesseract language codes, e.g. eng or eng+deu."
+    required: false
+    default: "eng"
+  ocr-dpi:
+    description: "Rasterisation DPI used when OCRing PDF pages."
+    required: false
+    default: "200"
+  min-chars-per-page:
+    description: "Below this many extracted characters per PDF page, auto OCR kicks in."
+    required: false
+    default: "100"
+  max-file-mb:
+    description: "Skip input files larger than this size in megabytes. 0 disables the limit."
+    required: false
+    default: "100"
+  compact:
+    description: "Collapse blank lines, trim trailing whitespace and drop repeated page headers and footers to cut tokens."
+    required: false
+    default: "true"
+  merge-into:
+    description: "Optional path of a single combined Markdown file containing every conversion."
+    required: false
+    default: ""
+  fail-on-error:
+    description: "Fail the job if any file fails to convert."
+    required: false
+    default: "false"
+
+outputs:
+  output-dir:
+    description: "Directory containing the generated Markdown."
+    value: ${{ steps.convert.outputs.output-dir }}
+  files-converted:
+    description: "Number of files converted successfully."
+    value: ${{ steps.convert.outputs.files-converted }}
+  files-failed:
+    description: "Number of files that failed to convert."
+    value: ${{ steps.convert.outputs.files-failed }}
+  manifest:
+    description: "Path to a JSON manifest describing every conversion."
+    value: ${{ steps.convert.outputs.manifest }}
+  merged-file:
+    description: "Path to the combined Markdown file, when merge-into was set."
+    value: ${{ steps.convert.outputs.merged-file }}
+  total-tokens:
+    description: "Approximate token count of all generated Markdown."
+    value: ${{ steps.convert.outputs.total-tokens }}
+  tokens-saved-pct:
+    description: "Approximate percentage reduction versus the raw input bytes."
+    value: ${{ steps.convert.outputs.tokens-saved-pct }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install system dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+        if command -v apt-get >/dev/null 2>&1; then
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            tesseract-ocr tesseract-ocr-all libreoffice-core libreoffice-writer \
+            libreoffice-calc libreoffice-impress
+        else
+          echo "::warning::Unsupported runner OS, skipping system dependency install. OCR and legacy Office formats may be unavailable."
+        fi
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        # hashFiles cannot read outside the workspace, so the key tracks the action version.
+        key: doc2md-v1-${{ runner.os }}-py3.11
+
+    - name: Install Python dependencies
+      shell: bash
+      run: python -m pip install --quiet --upgrade pip -r "${{ github.action_path }}/requirements.txt"
+
+    - name: Convert
+      id: convert
+      shell: bash
+      env:
+        INPUT_FILES: ${{ inputs.files }}
+        INPUT_OUTPUT_DIR: ${{ inputs.output-dir }}
+        INPUT_OCR: ${{ inputs.ocr }}
+        INPUT_OCR_LANG: ${{ inputs.ocr-lang }}
+        INPUT_OCR_DPI: ${{ inputs.ocr-dpi }}
+        INPUT_MIN_CHARS_PER_PAGE: ${{ inputs.min-chars-per-page }}
+        INPUT_MAX_FILE_MB: ${{ inputs.max-file-mb }}
+        INPUT_COMPACT: ${{ inputs.compact }}
+        INPUT_MERGE_INTO: ${{ inputs.merge-into }}
+        INPUT_FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+      run: python "${{ github.action_path }}/src/convert.py"
