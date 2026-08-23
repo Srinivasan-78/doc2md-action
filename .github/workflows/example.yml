@@ -1,0 +1,35 @@
+name: Convert documents to Markdown
+
+on:
+  push:
+    paths:
+      - "docs/**"
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: docs
+        uses: ./
+        with:
+          files: |
+            docs/**/*.pdf
+            docs/**/*.{docx,xlsx,pptx}
+            docs/**/*.{png,jpg}
+          output-dir: markdown
+          ocr: auto
+          merge-into: markdown/context.md
+
+      - name: Show what the agent will receive
+        run: |
+          echo "converted ${{ steps.docs.outputs.files-converted }} files"
+          echo "approx ${{ steps.docs.outputs.total-tokens }} tokens"
+          echo "${{ steps.docs.outputs.tokens-saved-pct }}% smaller than the raw inputs"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: markdown
+          path: markdown/
