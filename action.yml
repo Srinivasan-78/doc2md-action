@@ -80,16 +80,25 @@ runs:
 
     - name: Install system dependencies
       shell: bash
+      env:
+        INPUT_OCR: ${{ inputs.ocr }}
+        INPUT_OCR_LANG: ${{ inputs.ocr-lang }}
       run: |
         set -euo pipefail
-        if command -v apt-get >/dev/null 2>&1; then
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            tesseract-ocr tesseract-ocr-all libreoffice-core libreoffice-writer \
-            libreoffice-calc libreoffice-impress
-        else
+        if ! command -v apt-get >/dev/null 2>&1; then
           echo "::warning::Unsupported runner OS, skipping system dependency install. OCR and legacy Office formats may be unavailable."
+          exit 0
         fi
+        packages=(libreoffice-core libreoffice-writer libreoffice-calc libreoffice-impress)
+        if [ "$INPUT_OCR" != "off" ]; then
+          packages+=(tesseract-ocr)
+          # tesseract-ocr-all is several gigabytes; install only the requested languages.
+          for lang in ${INPUT_OCR_LANG//+/ }; do
+            packages+=("tesseract-ocr-${lang}")
+          done
+        fi
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends "${packages[@]}"
 
     - name: Cache pip
       uses: actions/cache@v4

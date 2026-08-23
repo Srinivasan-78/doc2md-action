@@ -121,7 +121,9 @@ def split_patterns(raw: str) -> list[str]:
     return [piece.strip() for piece in pieces if piece.strip()]
 
 
-def discover(patterns: list[str]) -> list[Path]:
+def discover(patterns: list[str], output_dir: Path) -> list[Path]:
+    # Anything already written by a previous run must not be converted again.
+    generated = output_dir.resolve()
     seen: dict[Path, None] = {}
     for raw in patterns:
         for pattern in expand_braces(raw):
@@ -131,7 +133,10 @@ def discover(patterns: list[str]) -> list[Path]:
                     continue
                 if EXCLUDED_DIRS.intersection(path.parts):
                     continue
-                seen.setdefault(path.resolve(), None)
+                resolved = path.resolve()
+                if resolved == generated or generated in resolved.parents:
+                    continue
+                seen.setdefault(resolved, None)
     return sorted(seen)
 
 
@@ -227,7 +232,7 @@ def convert_pdf(path: Path, cfg: Config, result: Result) -> str:
     pages: list[str] = []
     zoom = cfg.ocr_dpi / 72.0
 
-    for index, page in enumerate(doc, start=1):
+    for page in doc:
         text = page.get_text("text").strip()
         needs_ocr = cfg.ocr == "always" or (
             cfg.ocr == "auto" and len(text) < cfg.min_chars_per_page
@@ -368,12 +373,17 @@ def output_path_for(source: Path, cfg: Config, used: set[Path]) -> Path:
     return candidate
 
 
+def yaml_quote(value: str) -> str:
+    """Quote a scalar so colons, quotes and hashes in a path stay valid YAML."""
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def front_matter(source: Path, result: Result) -> str:
     return (
         "---\n"
-        f"source: {source.name}\n"
-        f"source_path: {result.source}\n"
-        f"kind: {result.kind}\n"
+        f"source: {yaml_quote(source.name)}\n"
+        f"source_path: {yaml_quote(result.source)}\n"
+        f"kind: {yaml_quote(result.kind)}\n"
         f"pages: {result.pages}\n"
         f"ocr: {str(result.ocr_used).lower()}\n"
         "---\n\n"
@@ -437,7 +447,7 @@ def write_summary(results: list[Result], total_tokens: int, saved_pct: float) ->
 
 def main() -> int:
     cfg = load_config()
-    sources = discover(cfg.patterns)
+    sources = discover(cfg.patterns, cfg.output_dir)
     if not sources:
         print(f"::warning::no input files matched {cfg.patterns}")
 
@@ -489,9 +499,16 @@ def main() -> int:
 
     manifest_path = cfg.output_dir / "manifest.json"
     total_tokens = sum(r.approx_tokens for r in results)
-    total_source_bytes = sum(r.source_bytes for r in results) or 1
-    total_md_chars = sum(r.markdown_chars for r in results)
-    saved_pct = max(0.0, (1 - total_md_chars / total_source_bytes) * 100)
+    # Skipped and failed inputs produced no Markdown, so counting their bytes
+    # here would report a reduction the action did not actually achieve.
+    written = [r for r in results if r.markdown_chars]
+    total_source_bytes = sum(r.source_bytes for r in written)
+    total_md_chars = sum(r.markdown_chars for r in written)
+    saved_pct = (
+        max(0.0, (1 - total_md_chars / total_source_bytes) * 100)
+        if total_source_bytes
+        else 0.0
+    )
 
     manifest_path.write_text(
         json.dumps(
@@ -503,7 +520,7 @@ def main() -> int:
                     "skipped": sum(1 for r in results if r.status == "skipped"),
                     "empty": sum(1 for r in results if r.status == "empty"),
                     "approx_tokens": total_tokens,
-                    "source_bytes": sum(r.source_bytes for r in results),
+                    "source_bytes": total_source_bytes,
                     "markdown_chars": total_md_chars,
                     "reduction_pct": round(saved_pct, 2),
                 },

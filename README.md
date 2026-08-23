@@ -1,80 +1,103 @@
-# Docs to Markdown Action
+# Docs to Markdown
 
-A GitHub Action that scans Excel, Word, PowerPoint, PDF and image files, extracts their text
-(falling back to OCR when a file has none) and writes token-efficient Markdown. The point is to
-stop feeding binary documents or bloated raw text to an AI agent: Markdown carries the same
-information in far fewer tokens, and the action reports exactly how many tokens the result costs.
+A GitHub Action that turns PDFs, Word documents, Excel sheets, PowerPoint decks and
+scanned images into plain Markdown files.
 
-## Usage
+Why bother? AI tools and code search can't read a `.pdf` or an `.xlsx` — they read text.
+This action does the reading for you, on every push, and leaves behind text files anyone
+(or anything) can open.
+
+## Quick start
+
+Put your documents somewhere in the repo, for example a `docs/` folder. Then create the
+file `.github/workflows/convert.yml`:
 
 ```yaml
-- uses: your-org/doc2md-action@v1
-  id: docs
-  with:
-    files: |
-      docs/**/*.pdf
-      docs/**/*.{docx,xlsx,pptx}
-      scans/**/*.png
-    output-dir: markdown
-    merge-into: markdown/context.md
+name: Convert documents to Markdown
 
-- run: echo "~${{ steps.docs.outputs.total-tokens }} tokens for the agent"
+on:
+  push:
+    paths:
+      - "docs/**"
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: srinivasan-78/doc2md-action@v1
+        with:
+          files: docs/**/*
+          merge-into: markdown/context.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: markdown
+          path: markdown/
 ```
 
-`merge-into` produces one combined file, which is usually what you want to paste into an agent
-prompt. Without it you get one `.md` per input, mirroring the source directory layout.
+Push it. When the run finishes, open the workflow run on GitHub and download the
+`markdown` artifact — that's your documents as text.
 
-## Supported inputs
+That's the whole thing. Everything below is optional.
 
-| Format | Handling |
+## What the two settings above do
+
+- `files` — which documents to convert. `docs/**/*` means "everything under `docs/`,
+  including subfolders". You can list several patterns, one per line.
+- `merge-into` — also glue every converted document into one big file. Handy when you
+  want to paste the lot into ChatGPT or Claude. Leave it out and you just get one `.md`
+  per document instead.
+
+## What it can read
+
+| You have | You get |
 | --- | --- |
-| `.pdf` | Text layer via PyMuPDF, per page, with OCR fallback for scanned pages |
-| `.docx`, `.pptx`, `.html`, `.epub` | MarkItDown |
-| `.xlsx`, `.xlsm`, `.csv`, `.tsv` | pandas, one Markdown table per sheet, empty rows and columns dropped |
-| `.doc`, `.xls`, `.ppt` | Upgraded through LibreOffice, then handled as above |
-| `.png`, `.jpg`, `.tif`, `.bmp`, `.webp` | Tesseract OCR |
-| `.txt`, `.md`, `.rst`, `.log` | Passed through and compacted |
+| PDF | The text of each page. If a page is a scan with no text, it is read with OCR |
+| Word, PowerPoint, HTML | Headings, paragraphs and lists as Markdown |
+| Excel, CSV | One Markdown table per sheet |
+| Old Office files (`.doc`, `.xls`, `.ppt`) | Converted to the modern format first, then as above |
+| Photos and screenshots (`.png`, `.jpg`, …) | Any text in the image, read with OCR |
 
-## Inputs
+Every output file begins with a short header naming the document it came from, so you can
+always trace a sentence back to its source.
 
-| Name | Default | Description |
+## Other settings
+
+All optional — the defaults are sensible.
+
+| Setting | Default | What it does |
 | --- | --- | --- |
-| `files` | every supported extension, recursively | Glob patterns, newline or comma separated. `{a,b}` alternatives are supported. |
-| `output-dir` | `markdown` | Where the Markdown is written. |
-| `ocr` | `auto` | `auto` OCRs only pages with too little text, `always` OCRs every page, `off` disables it. |
-| `ocr-lang` | `eng` | Tesseract language codes, for example `eng+deu`. |
-| `ocr-dpi` | `200` | Rasterisation DPI for OCRed PDF pages. Raise it for small print, at the cost of runtime. |
-| `min-chars-per-page` | `100` | The `auto` OCR threshold. |
-| `max-file-mb` | `100` | Inputs above this size are skipped. `0` disables the limit. |
-| `compact` | `true` | Collapses blank lines and whitespace and drops headers and footers that repeat across pages. |
-| `merge-into` | none | Path of a single combined Markdown file. |
-| `fail-on-error` | `false` | Fail the job if any file fails to convert. |
+| `files` | every supported file in the repo | Which documents to convert |
+| `output-dir` | `markdown` | Where to put the results |
+| `ocr` | `auto` | `auto` reads scans only when a page has no text, `always` reads every page as an image (slow), `off` never does |
+| `ocr-lang` | `eng` | Language of the scans. Combine with `+`, e.g. `eng+deu` |
+| `ocr-dpi` | `200` | Higher values read small print better but take longer |
+| `min-chars-per-page` | `100` | A PDF page with fewer characters than this is treated as a scan |
+| `max-file-mb` | `100` | Files bigger than this are skipped. `0` means no limit |
+| `compact` | `true` | Strips blank lines and the headers and footers repeated on every page |
+| `merge-into` | none | Path for a single combined file |
+| `fail-on-error` | `false` | Set to `true` to fail the job when a document can't be read |
 
-## Outputs
+## Things the action tells you afterwards
 
-| Name | Description |
-| --- | --- |
-| `output-dir` | Directory containing the generated Markdown. |
-| `files-converted` | Number of files converted successfully. |
-| `files-failed` | Number of files that failed. |
-| `manifest` | Path to `manifest.json`, describing every conversion. |
-| `merged-file` | Path to the combined file, when `merge-into` was set. |
-| `total-tokens` | Approximate token count of all generated Markdown. |
-| `tokens-saved-pct` | Approximate size reduction versus the raw input bytes. |
+Use these in later steps as `${{ steps.<id>.outputs.<name> }}`:
 
-Every generated file starts with YAML front matter recording the source path, kind, page count and
-whether OCR was used, so an agent can cite where a fact came from. A run summary table is written to
-the job summary, and `manifest.json` holds the same data in machine-readable form.
+`output-dir`, `files-converted`, `files-failed`, `merged-file`, `total-tokens`,
+`tokens-saved-pct`, and `manifest` — the path to a `manifest.json` listing every document,
+its page count and whether OCR was needed.
 
-## Token behaviour
+The same numbers appear as a table in the workflow run summary, so usually you don't need
+to wire anything up.
 
-The `compact` step removes the three largest sources of waste in converted documents: runs of blank
-lines, repeated page headers and footers, and long rules of dashes or underscores. Token counts are
-estimated at roughly four characters per token, which is close enough for budgeting but is not a
-tokenizer.
+## Good to know
 
-## Requirements
-
-The action runs on `ubuntu-latest`. It installs Tesseract and LibreOffice through `apt-get`, so it
-needs a runner where `sudo apt-get` works. On other runner images the action still runs, but OCR and
-legacy Office formats are unavailable and are reported as warnings.
+- Runs on `ubuntu-latest`. It installs Tesseract (for OCR) and LibreOffice (for old Office
+  files) at the start of the job, which adds a minute or two to the first run.
+- On Windows or macOS runners the conversion still works, but scans and old Office files
+  are skipped with a warning.
+- `total-tokens` is an estimate, roughly four characters per token. Close enough for
+  budgeting, not a real tokenizer.
+- One unreadable document does not stop the run. It is listed as failed and everything
+  else still converts.
