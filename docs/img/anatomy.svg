@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-label="Anatomy of a converted Markdown file: a header block naming the source document, then one section per page">
+  <rect width="900" height="400" rx="16" fill="#f7f6ff"/>
+  <g font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+    <text x="40" y="46" font-size="18" font-weight="600" fill="#2c2a4a">Inside one converted file: markdown/report.md</text>
+
+    <rect x="40" y="66" width="520" height="300" rx="12" fill="#ffffff" stroke="#c9c5e8" stroke-width="2"/>
+    <g font-family="JetBrains Mono, Consolas, monospace" font-size="14" fill="#2c2a4a">
+      <text x="62" y="98">---</text>
+      <text x="62" y="122">source: "report.pdf"</text>
+      <text x="62" y="146">source_path: "docs/report.pdf"</text>
+      <text x="62" y="170">kind: "pdf"</text>
+      <text x="62" y="194">pages: 12</text>
+      <text x="62" y="218">ocr: true</text>
+      <text x="62" y="242">---</text>
+      <text x="62" y="282" fill="#6b4ee6">## Page 1</text>
+      <text x="62" y="306">Quarterly numbers were up ...</text>
+      <text x="62" y="342" fill="#6b4ee6">## Page 2</text>
+    </g>
+
+    <path d="M566 150 H 640" stroke="#6b4ee6" stroke-width="3" fill="none" marker-end="url(#b)"/>
+    <path d="M566 300 H 640" stroke="#6b4ee6" stroke-width="3" fill="none" marker-end="url(#b)"/>
+    <defs>
+      <marker id="b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#6b4ee6"/>
+      </marker>
+    </defs>
+
+    <rect x="650" y="110" width="210" height="82" rx="10" fill="#efecff"/>
+    <text x="670" y="138" font-size="14" font-weight="600" fill="#2c2a4a">The label</text>
+    <text x="670" y="160" font-size="13" fill="#54507a">Says which document</text>
+    <text x="670" y="178" font-size="13" fill="#54507a">this text came from.</text>
+
+    <rect x="650" y="262" width="210" height="82" rx="10" fill="#efecff"/>
+    <text x="670" y="290" font-size="14" font-weight="600" fill="#2c2a4a">The pages</text>
+    <text x="670" y="312" font-size="13" fill="#54507a">One heading per page,</text>
+    <text x="670" y="330" font-size="13" fill="#54507a">in the original order.</text>
+  </g>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Documents go into the converter and come out as Markdown text files">
+  <rect width="900" height="300" rx="16" fill="#f7f6ff"/>
+  <g font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+
+    <!-- left: messy documents -->
+    <text x="130" y="46" font-size="18" font-weight="600" fill="#2c2a4a" text-anchor="middle">What you have</text>
+    <g>
+      <rect x="40" y="70" width="80" height="100" rx="8" fill="#ffffff" stroke="#c9c5e8" stroke-width="2"/>
+      <text x="80" y="128" font-size="15" font-weight="600" fill="#6b4ee6" text-anchor="middle">PDF</text>
+      <rect x="140" y="70" width="80" height="100" rx="8" fill="#ffffff" stroke="#c9c5e8" stroke-width="2"/>
+      <text x="180" y="128" font-size="15" font-weight="600" fill="#6b4ee6" text-anchor="middle">DOCX</text>
+      <rect x="40" y="180" width="80" height="70" rx="8" fill="#ffffff" stroke="#c9c5e8" stroke-width="2"/>
+      <text x="80" y="220" font-size="14" font-weight="600" fill="#6b4ee6" text-anchor="middle">XLSX</text>
+      <rect x="140" y="180" width="80" height="70" rx="8" fill="#ffffff" stroke="#c9c5e8" stroke-width="2"/>
+      <text x="180" y="220" font-size="14" font-weight="600" fill="#6b4ee6" text-anchor="middle">PNG</text>
+    </g>
+    <text x="130" y="278" font-size="13" fill="#6f6b8f" text-anchor="middle">Computers cannot read these as text</text>
+
+    <!-- arrow -->
+    <path d="M245 160 H 320" stroke="#6b4ee6" stroke-width="4" fill="none" marker-end="url(#a)"/>
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#6b4ee6"/>
+      </marker>
+    </defs>
+
+    <!-- middle: the machine -->
+    <rect x="335" y="80" width="230" height="160" rx="14" fill="#6b4ee6"/>
+    <text x="450" y="130" font-size="20" font-weight="600" fill="#ffffff" text-anchor="middle">doc2md</text>
+    <text x="450" y="160" font-size="14" fill="#ded8ff" text-anchor="middle">reads every page</text>
+    <text x="450" y="182" font-size="14" fill="#ded8ff" text-anchor="middle">uses OCR on scans</text>
+    <text x="450" y="204" font-size="14" fill="#ded8ff" text-anchor="middle">writes plain text</text>
+
+    <!-- arrow -->
+    <path d="M590 160 H 665" stroke="#6b4ee6" stroke-width="4" fill="none" marker-end="url(#a)"/>
+
+    <!-- right: markdown -->
+    <text x="775" y="46" font-size="18" font-weight="600" fill="#2c2a4a" text-anchor="middle">What you get</text>
+    <rect x="690" y="70" width="170" height="180" rx="10" fill="#ffffff" stroke="#c9c5e8" stroke-width="2"/>
+    <text x="710" y="100" font-size="13" font-family="JetBrains Mono, Consolas, monospace" fill="#6b4ee6"># Page 1</text>
+    <rect x="710" y="112" width="120" height="8" rx="4" fill="#e2defb"/>
+    <rect x="710" y="128" width="130" height="8" rx="4" fill="#e2defb"/>
+    <rect x="710" y="144" width="95" height="8" rx="4" fill="#e2defb"/>
+    <text x="710" y="178" font-size="13" font-family="JetBrains Mono, Consolas, monospace" fill="#6b4ee6"># Page 2</text>
+    <rect x="710" y="190" width="125" height="8" rx="4" fill="#e2defb"/>
+    <rect x="710" y="206" width="105" height="8" rx="4" fill="#e2defb"/>
+    <rect x="710" y="222" width="135" height="8" rx="4" fill="#e2defb"/>
+    <text x="775" y="278" font-size="13" fill="#6f6b8f" text-anchor="middle">Plain .md text anything can read</text>
+  </g>
+</svg>
