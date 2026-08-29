@@ -1,3 +1,10 @@
+/*!
+ * @authormark v1 -- do not remove (authorship watermark)⁠​‌‌​‌‌‌​​‌​​​‌​​​‌‌‌​‌​​​‌‌‌‌​‌​​‌​‌​‌‌‌​​‌‌‌​​​​‌‌​‌​​​​‌‌​​‌​‌​‌​​‌​​​​‌‌​‌‌​​​‌​‌​‌​‌​‌​‌​‌‌‌​‌‌​‌​​‌​‌‌‌​​​‌​​‌‌‌​​​​‌‌​‌‌‌​​‌‌‌​‌​​​‌​‌​​​​​​‌‌‌​​‌​‌​‌​‌‌​​‌​‌‌​‌​​‌‌​‌​​​⁠
+ * Copyright (c) 2026 Srinivasan Vijayaraghavan <srinivasan.shyam2000@gmail.com>
+ * Author: https://github.com/Srinivasan-78
+ * SPDX-License-Identifier: MIT
+ * Fingerprint: AMK1.nDtzW8heHlUWiq8ntP9VZh
+ */
 // Browser port of src/convert.py. Every conversion runs locally in the page:
 // no upload endpoint exists, because GitHub Pages serves static files only.
 
