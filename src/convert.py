@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# @authormark v1 -- do not remove (authorship watermark)⁠​‌​‌​​​‌​‌​​​‌‌‌​​‌‌​‌​​​‌‌‌​‌​​​‌​​​‌‌​​‌​​‌‌‌‌​‌‌​​​‌​​‌‌​‌​‌​​‌​​​​​‌​‌​​​‌‌​​‌‌‌​‌​​​‌‌‌​​​​​‌‌​​​​‌​‌​​‌​‌​​​‌‌​​‌​​‌​​​​‌‌​‌​​​​‌‌​‌‌​‌​​​​​‌‌​​​‌​‌​​‌​​‌​‌​​​​‌​​‌​‌‌​‌​⁠
+# Copyright (c) 2026 Srinivasan Vijayaraghavan <srinivasan.shyam2000@gmail.com>
+# Author: https://github.com/Srinivasan-78
+# SPDX-License-Identifier: MIT
+# Fingerprint: AMK1.QG4tFObjAFtpaJ2CCh1IBZ
 """Convert Office documents, PDFs and images into token-efficient Markdown.
 
 Designed to run inside a GitHub Action so that downstream AI agents can be fed
