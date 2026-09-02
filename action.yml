@@ -106,7 +106,7 @@ runs:
         sudo apt-get install -y -qq --no-install-recommends "${packages[@]}"
 
     - name: Cache pip
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.cache/pip
         # hashFiles cannot read outside the workspace, so the key tracks the action version.
