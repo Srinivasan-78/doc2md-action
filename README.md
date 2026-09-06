@@ -275,5 +275,5 @@ To try it locally, run `python -m http.server -d site` and open <http://localhos
 | `src/convert.py` | The converter that runs on the GitHub runner |
 | `site/` | The browser converter (`index.html`, `app.js`, `style.css`) |
 | `.github/workflows/pages.yml` | Publishes `site/` to GitHub Pages |
-| `.github/workflows/example.yml` | A working example of using the Action |
+| `.github/workflows/example.yml` | A working example of using the Action (`workflow_dispatch` manual trigger) |
 | `docs/img/` | The diagrams in this README |
