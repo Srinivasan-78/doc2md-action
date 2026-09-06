@@ -6,9 +6,6 @@
 name: Convert documents to Markdown
 
 on:
-  push:
-    paths:
-      - "docs/**"
   workflow_dispatch:
 
 permissions:
