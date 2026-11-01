@@ -1,5 +1,5 @@
 markitdown[docx,pptx,xlsx,xls,pdf,outlook]==0.1.9
-pymupdf==1.28.2
+pymupdf==2.0
 pytesseract==0.3.13
 pillow==12.3.0
 openpyxl==3.1.5
